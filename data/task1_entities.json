@@ -1,10 +1,5 @@
 [
   {
-    "qid": "Q136092892",
-    "name": "Q136092892",
-    "repo": "https://github.com/castorini/pyserini"
-  },
-  {
     "qid": "Q96631404",
     "name": "PyKEEN",
     "repo": "https://github.com/pykeen/pykeen"
@@ -258,5 +253,10 @@
     "qid": "Q121435758",
     "name": "triton",
     "repo": "https://github.com/triton-lang/triton"
+  },
+  {
+    "qid": "Q136092892",
+    "name": "Pyserini",
+    "repo": "https://github.com/castorini/pyserini"
   }
 ]

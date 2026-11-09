@@ -11,11 +11,14 @@
 ├── ontology.ttl                      # Доменная онтология в формате OWL/Turtle
 ├── knowledge_graph.ttl               # Граф знаний (52 библиотеки + версии + owl:sameAs) в формате Turtle
 ├── shapes.shacl.ttl                  # Ограничения целостности SHACL (cardinality, class, datatype, pattern)
-├── Отчет_Контрольная_работа_1.docx   # Итоговый отчет со всеми разделами и 12 вопросами
 ├── Сравнение_доменов_Wikidata.xlsx   # Сравнительная таблица доменов с листом 52 библиотек PyTorch
+├── Резы/
+│   ├── задание_1.ipynb               # Ноутбук с верификацией всех пунктов Задания 1
+│   └── Отчет_Контрольная_работа_1.docx # Итоговый отчет со всеми разделами и 12 вопросами
 ├── data/
 │   ├── corpus.jsonl                  # Текстовый корпус по 52 библиотекам (извлечен из README.md на GitHub)
 │   ├── libraries_metadata.json       # Метаданные библиотек, выгруженные из Wikidata
+│   ├── task1_entities.json           # Список 52 сущностей с QID, названиями и репозиториями
 │   ├── shacl_validation_report.txt   # Протокол валидации PySHACL
 │   └── owlrl_reasoning_summary.txt   # Протокол дедуктивного вывода OWL 2 RL
 └── scripts/

@@ -20,7 +20,7 @@ SELECT DISTINCT ?item ?itemLabel ?itemDescription ?repo ?license ?licenseLabel ?
   ?item wdt:P1324 ?repo .         # code repository
   OPTIONAL { ?item wdt:P275 ?license . }
   OPTIONAL { ?item wdt:P571 ?inception . }
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en,mul,da". }
 }
 ORDER BY ?itemLabel
 """
@@ -39,11 +39,15 @@ print(f"Retrieved {len(bindings)} library records.")
 libraries = {}
 for b in bindings:
     qid = b['item']['value'].split('/')[-1]
+    raw_label = b.get('itemLabel', {}).get('value', qid)
+    repo_url = b.get('repo', {}).get('value', '')
+    if raw_label.startswith('Q') and raw_label[1:].isdigit() and repo_url:
+        raw_label = repo_url.rstrip('/').split('/')[-1]
     if qid not in libraries:
         libraries[qid] = {
             'qid': qid,
             'uri': b['item']['value'],
-            'label': b.get('itemLabel', {}).get('value', qid),
+            'label': raw_label,
             'description': b.get('itemDescription', {}).get('value', ''),
             'repos': set(),
             'licenses': set(),
