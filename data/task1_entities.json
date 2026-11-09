@@ -1,0 +1,262 @@
+[
+  {
+    "qid": "Q136092892",
+    "name": "Q136092892",
+    "repo": "https://github.com/castorini/pyserini"
+  },
+  {
+    "qid": "Q96631404",
+    "name": "PyKEEN",
+    "repo": "https://github.com/pykeen/pykeen"
+  },
+  {
+    "qid": "Q85847011",
+    "name": "PyTorch Lightning",
+    "repo": "https://github.com/Lightning-AI/lightning"
+  },
+  {
+    "qid": "Q116908797",
+    "name": "STonKGs",
+    "repo": "https://github.com/stonkgs/stonkgs"
+  },
+  {
+    "qid": "Q120550372",
+    "name": "Stanza",
+    "repo": "https://github.com/stanfordnlp/stanza"
+  },
+  {
+    "qid": "Q116908792",
+    "name": "accelerate",
+    "repo": "https://github.com/huggingface/accelerate"
+  },
+  {
+    "qid": "Q107382302",
+    "name": "allennlp",
+    "repo": "https://github.com/allenai/allennlp"
+  },
+  {
+    "qid": "Q107382376",
+    "name": "attacut",
+    "repo": "https://github.com/PyThaiNLP/attacut"
+  },
+  {
+    "qid": "Q107382224",
+    "name": "bert-score",
+    "repo": "https://github.com/Tiiiger/bert_score"
+  },
+  {
+    "qid": "Q107382330",
+    "name": "botorch",
+    "repo": "https://github.com/meta-pytorch/botorch"
+  },
+  {
+    "qid": "Q107382311",
+    "name": "captum",
+    "repo": "https://github.com/meta-pytorch/captum"
+  },
+  {
+    "qid": "Q107382139",
+    "name": "catalyst",
+    "repo": "https://github.com/catalyst-team/catalyst"
+  },
+  {
+    "qid": "Q120549792",
+    "name": "clean-fid",
+    "repo": "https://github.com/GaParmar/clean-fid"
+  },
+  {
+    "qid": "Q120596958",
+    "name": "effdet",
+    "repo": "https://github.com/rwightman/efficientdet-pytorch"
+  },
+  {
+    "qid": "Q120550306",
+    "name": "face-alignment",
+    "repo": "https://github.com/1adrianb/face-alignment"
+  },
+  {
+    "qid": "Q120549805",
+    "name": "facexlib",
+    "repo": "https://github.com/xinntao/facexlib"
+  },
+  {
+    "qid": "Q107382238",
+    "name": "fairseq",
+    "repo": "https://github.com/pytorch/fairseq"
+  },
+  {
+    "qid": "Q107386786",
+    "name": "flair",
+    "repo": "https://github.com/flairNLP/flair"
+  },
+  {
+    "qid": "Q120733208",
+    "name": "flexgen",
+    "repo": "https://github.com/FMInference/FlexGen"
+  },
+  {
+    "qid": "Q120733123",
+    "name": "fschat",
+    "repo": "https://github.com/lm-sys/fastchat"
+  },
+  {
+    "qid": "Q120549808",
+    "name": "gfpgan",
+    "repo": "https://github.com/TencentARC/GFPGAN"
+  },
+  {
+    "qid": "Q107382323",
+    "name": "gpytorch",
+    "repo": "https://github.com/cornellius-gp/gpytorch"
+  },
+  {
+    "qid": "Q120634941",
+    "name": "hummingbird-ml",
+    "repo": "https://github.com/microsoft/hummingbird"
+  },
+  {
+    "qid": "Q120550406",
+    "name": "invisible-watermark",
+    "repo": "https://github.com/ShieldMnt/invisible-watermark"
+  },
+  {
+    "qid": "Q107382312",
+    "name": "kornia",
+    "repo": "https://github.com/kornia/kornia"
+  },
+  {
+    "qid": "Q120550319",
+    "name": "lion-pytorch",
+    "repo": "https://github.com/lucidrains/lion-pytorch"
+  },
+  {
+    "qid": "Q120550308",
+    "name": "lpips",
+    "repo": "https://github.com/richzhang/PerceptualSimilarity"
+  },
+  {
+    "qid": "Q120550358",
+    "name": "nerfacc",
+    "repo": "https://github.com/KAIR-BAIR/nerfacc"
+  },
+  {
+    "qid": "Q120550360",
+    "name": "open-clip-torch",
+    "repo": "https://github.com/mlfoundations/open_clip"
+  },
+  {
+    "qid": "Q120634951",
+    "name": "peft",
+    "repo": "https://github.com/huggingface/peft"
+  },
+  {
+    "qid": "Q120550139",
+    "name": "pgmpy",
+    "repo": "https://github.com/pgmpy/pgmpy"
+  },
+  {
+    "qid": "Q107382321",
+    "name": "pyro-ppl",
+    "repo": "https://github.com/pyro-ppl/pyro"
+  },
+  {
+    "qid": "Q107381754",
+    "name": "pytorch-ignite",
+    "repo": "https://github.com/pytorch/ignite"
+  },
+  {
+    "qid": "Q107385500",
+    "name": "pytorch-pretrained-bert",
+    "repo": "https://github.com/huggingface/transformers"
+  },
+  {
+    "qid": "Q120550386",
+    "name": "pytorch-ranger",
+    "repo": "https://github.com/mpariente/Ranger-Deep-Learning-Optimizer"
+  },
+  {
+    "qid": "Q107385836",
+    "name": "pytorch-transformers",
+    "repo": "https://github.com/huggingface/transformers"
+  },
+  {
+    "qid": "Q120550396",
+    "name": "pytorch-wavelets",
+    "repo": "https://github.com/fbcotter/pytorch_wavelets"
+  },
+  {
+    "qid": "Q120550392",
+    "name": "rotary-embedding-torch",
+    "repo": "https://github.com/lucidrains/rotary-embedding-torch"
+  },
+  {
+    "qid": "Q107386398",
+    "name": "snorkel",
+    "repo": "https://github.com/snorkel-team/snorkel"
+  },
+  {
+    "qid": "Q107381748",
+    "name": "thop",
+    "repo": "https://github.com/Lyken17/pytorch-OpCounter"
+  },
+  {
+    "qid": "Q107382194",
+    "name": "timm",
+    "repo": "https://github.com/huggingface/pytorch-image-models"
+  },
+  {
+    "qid": "Q120549814",
+    "name": "tomesd",
+    "repo": "https://github.com/dbolya/tomesd"
+  },
+  {
+    "qid": "Q116908631",
+    "name": "torch-max-mem",
+    "repo": "https://github.com/mberr/torch-max-mem"
+  },
+  {
+    "qid": "Q120550387",
+    "name": "torch-optimizer",
+    "repo": "https://github.com/jettify/pytorch-optimizer"
+  },
+  {
+    "qid": "Q116908634",
+    "name": "torch-ppr",
+    "repo": "https://github.com/mberr/torch-ppr"
+  },
+  {
+    "qid": "Q107381747",
+    "name": "torchaudio",
+    "repo": "https://github.com/pytorch/audio"
+  },
+  {
+    "qid": "Q120549815",
+    "name": "torchdiffeq",
+    "repo": "https://github.com/rtqichen/torchdiffeq"
+  },
+  {
+    "qid": "Q107381756",
+    "name": "torchmetrics",
+    "repo": "https://github.com/Lightning-AI/torchmetrics"
+  },
+  {
+    "qid": "Q120549817",
+    "name": "torchsde",
+    "repo": "https://github.com/google-research/torchsde"
+  },
+  {
+    "qid": "Q107381760",
+    "name": "torchtext",
+    "repo": "https://github.com/pytorch/text"
+  },
+  {
+    "qid": "Q107381670",
+    "name": "torchvision",
+    "repo": "https://github.com/pytorch/vision"
+  },
+  {
+    "qid": "Q121435758",
+    "name": "triton",
+    "repo": "https://github.com/triton-lang/triton"
+  }
+]
