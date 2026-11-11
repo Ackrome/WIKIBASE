@@ -1,9 +1,13 @@
+from copy import deepcopy
+from pathlib import Path
+
 import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.text.paragraph import Paragraph
 import json
 import os
 
@@ -204,181 +208,28 @@ doc.add_paragraph()
 # ==========================================
 add_header("Задание 2. Формулировка 12 вопросов к базе знаний")
 
-doc.add_paragraph(
-    "В соответствии с техническим заданием сформулированы 12 вопросов трех типов: "
-    "6 графовых вопросов (содержащих фильтрацию по числу/дате, агрегацию, сортировку, многошаговый переход и временные квалификаторы), "
-    "4 текстовых вопроса к корпусу README и 2 комбинированных вопроса."
-)
+task2_path = Path(__file__).resolve().parents[1] / "Резы" / "Отчёт_задание_2.docx"
+task2_doc = docx.Document(task2_path)
+heading_levels = {"Heading1": 2, "Heading2": 3}
 
-add_header("Группа А: 6 вопросов к графу знаний", level=2)
+# Skip the standalone title and page settings. Format headings as in the full report.
+for element in task2_doc.element.body[1:-1]:
+    block = deepcopy(element)
+    if block.tag == qn("w:p"):
+        paragraph = Paragraph(block, doc)
+        level = heading_levels.get(paragraph.style.style_id)
+        if level is not None:
+            header = add_header(paragraph.text, level=level)
+            header.paragraph_format.keep_with_next = True
+            continue
+        if paragraph.text.startswith("Тип. "):
+            paragraph.paragraph_format.keep_with_next = True
 
-graph_questions = [
-    ("Вопрос 1 (Фильтр по числу)",
-     "Какие библиотеки экосистемы PyTorch имеют более 20 зарегистрированных версий (релизов)? Вывести названия и число версий.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?cnt WHERE {
-  ?lib a ?cls ;
-       pte:libraryName ?name ;
-       pte:versionCount ?cnt .
-  FILTER(?cnt > 20)
-}
-ORDER BY DESC(?cnt)""",
-     "Список из 23 библиотек, лидерами которого являются pytorch-transformers (237 версий), PyTorch Lightning (208 версий), accelerate (67 версий), torchmetrics (63 версии), open-clip-torch (56 версий), botorch (55 версий), timm (50 версий), allennlp (47 версий), kornia (42 версии)."),
-
-    ("Вопрос 2 (Агрегация)",
-     "Посчитать распределение количества библиотек экосистемы по типам лицензий.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?licName (COUNT(DISTINCT ?lib) AS ?libCount) WHERE {
-  ?lib pte:hasLicense ?lic .
-  ?lic pte:licenseName ?licName .
-}
-GROUP BY ?licName
-ORDER BY DESC(?libCount)""",
-     "Лицензия MIT — 22 библиотеки; Apache License 2.0 — 20 библиотек; модифицированная лицензия BSD (3-clause) — 5 библиотек; 2-пунктная лицензия BSD — 2 библиотеки."),
-
-    ("Вопрос 3 (Сортировка и топ)",
-     "Вывести топ-5 библиотек с наибольшим числом версий в порядке убывания.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?cnt WHERE {
-  ?lib pte:libraryName ?name ;
-       pte:versionCount ?cnt .
-}
-ORDER BY DESC(?cnt)
-LIMIT 5""",
-     "1. pytorch-pretrained-bert (237 версий); 2. pytorch-transformers (237 версий); 3. PyTorch Lightning (208 версий); 4. accelerate (67 версий); 5. torchmetrics (63 версии)."),
-
-    ("Вопрос 4 (Многошаговый переход, >= 2 ребер)",
-     "Найти библиотеки компьютерного зрения, зависящие от PyTorch, распространяемые по лицензии Apache 2.0, и получить ссылки на их GitHub-репозитории.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?repoUrl WHERE {
-  ?lib a pte:ComputerVisionLibrary ;
-       pte:libraryName ?name ;
-       pte:hasLicense ?lic ;
-       pte:hasRepository ?repo .
-  ?lic pte:licenseName ?licName .
-  ?repo pte:repositoryURL ?repoUrl .
-  FILTER(CONTAINS(LCASE(?licName), "apache"))
-}
-ORDER BY ?name""",
-     "1. effdet (https://github.com/rwightman/efficientdet-pytorch); 2. kornia (https://github.com/kornia/kornia); 3. timm (https://github.com/huggingface/pytorch-image-models)."),
-
-    ("Вопрос 5 (Вопрос с квалификатором времени)",
-     "Какие версии библиотек экосистемы были опубликованы в 2023 году? Вывести название библиотеки, номер версии и точную дату выпуска.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-SELECT ?name ?vNum ?date WHERE {
-  ?lib pte:libraryName ?name ;
-       pte:hasVersion ?v .
-  ?v pte:versionIdentifier ?vNum ;
-     pte:releaseDate ?date .
-  FILTER(?date >= "2023-01-01T00:00:00Z"^^xsd:dateTime && 
-         ?date < "2024-01-01T00:00:00Z"^^xsd:dateTime)
-}
-ORDER BY ?date""",
-     "pyro-ppl v1.8.4 (2023-01-03); gpytorch v1.9.1 (2023-01-04); open-clip-torch v2.9.2 (2023-01-05); botorch v0.8.1 (2023-01-06); PyTorch Lightning v1.9.0 (2023-01-17) и др."),
-
-    ("Вопрос 6 (Иерархическая классификация)",
-     "Найти все библиотеки обработки естественного языка (NLP) и вывести их репозитории.",
-     """PREFIX pte: <http://example.org/pytorch-ecosystem#>
-SELECT ?name ?repoUrl WHERE {
-  ?lib a pte:NaturalLanguageProcessingLibrary ;
-       pte:libraryName ?name ;
-       pte:hasRepository ?repo .
-  ?repo pte:repositoryURL ?repoUrl .
-}
-ORDER BY ?name""",
-     "STonKGs, Stanza, allennlp, attacut, bert-score, flair, fschat, peft, pytorch-pretrained-bert, pytorch-transformers, snorkel, torchtext (всего 12 библиотек).")
-]
-
-for title, q_text, sparql_code, ans in graph_questions:
-    add_header(title, level=3)
-    p = doc.add_paragraph()
-    p.add_run("Формулировка: ").bold = True
-    p.add_run(q_text)
-    add_code_block(sparql_code)
-    p_ans = doc.add_paragraph()
-    p_ans.add_run("Эталонный ответ: ").bold = True
-    p_ans.add_run(ans)
-
-add_header("Группа Б: 4 текстовых вопроса к корпусу README", level=2)
-text_questions = [
-    ("Вопрос 7 (Причина создания / мотивация)",
-     "Какова главная мотивация создания библиотеки Kornia и чем ее архитектура принципиально отличается от традиционных библиотек OpenCV и Pillow?",
-     "Kornia создана для предоставления дифференцируемых операций компьютерного зрения, работающих непосредственно с тензорами PyTorch на GPU. Традиционные библиотеки (OpenCV, Pillow) работают на CPU с массивами NumPy и не поддерживают градиентный спуск, разрывая граф обратного распространения ошибки (autograd). Kornia позволяет встраивать трансформации изображений и пространственные преобразования непосредственно в архитектуру нейросети как обучаемые слои.",
-     "\"Kornia is a differentiable computer vision library for PyTorch... It consists of a set of routines and differentiable modules to solve generic computer vision problems. At its core, the package uses PyTorch as its main backend both for efficiency and to take advantage of the reverse-mode auto-differentiation.\"",
-     "https://github.com/kornia/kornia",
-     "В графе знаний зафиксированы только факты зависимости и лицензия, математические принципы дифференцируемости и работа с autograd в онтологии отсутствуют."),
-
-    ("Вопрос 8 (История создания и авторство)",
-     "В какой исследовательской лаборатории зародилась разработка библиотеки вероятностного программирования Pyro и под чьим управлением она находится сегодня?",
-     "Библиотека глубокого вероятностного программирования Pyro была изначально создана исследовательской группой Uber AI Labs. В настоящее время проект передан независимому сообществу разработчиков и поддерживается некоммерческой организацией Linux Foundation под эгидой LF AI & Data.",
-     "\"Pyro is a flexible, scalable deep probabilistic programming library built on PyTorch... Originally developed at Uber AI Labs, Pyro is now maintained by the community and the Linux Foundation.\"",
-     "https://github.com/pyro-ppl/pyro",
-     "В исходных триплетах Wikidata свойство создателя/разработчика (P178) для сущности Pyro не заполнено."),
-
-    ("Вопрос 9 (Архитектурное описание / компоненты)",
-     "Какие механизмы и бэкенды распределенного параллелизма поддерживает библиотека Hugging Face Accelerate?",
-     "Библиотека Accelerate предоставляет унифицированный интерфейс для обучения моделей PyTorch на нескольких GPU, TPU, кластерах с поддержкой Fully Sharded Data Parallel (FSDP), DeepSpeed (все стадии ZeRO), Megatron-LM, а также распределенного параллелизма данных (DDP) и смешанной точности (FP16, BF16, FP8).",
-     "\"Accelerate was created for PyTorch users who like writing the training loop of PyTorch models... it provides an easy API to make your scripts runnable with multi-GPU, TPU, DeepSpeed, and FSDP, while seamlessly handling device placement and mixed precision.\"",
-     "https://github.com/huggingface/accelerate",
-     "Спецификации аппаратных бэкендов и уровней квантования относятся к деталям технической документации и не являются свойствами верхнего уровня Wikidata."),
-
-    ("Вопрос 10 (Функциональные возможности и алгоритмы)",
-     "Какие фундаментальные алгоритмы атрибуции признаков (Feature Attribution) предоставляет библиотека интерпретируемости Captum?",
-     "Captum предоставляет алгоритмы Integrated Gradients, DeepLIFT, SmoothGrad, Guided Grad-CAM, Conductance и Kernel SHAP, позволяющие оценивать вклад входных признаков и скрытых нейронов в итоговое предсказание глубоких моделей.",
-     "\"Captum is a model interpretability and understanding library for PyTorch... It provides state-of-the-art algorithms including Integrated Gradients, DeepLIFT, SmoothGrad, and Conductance to understand feature importance and neuron contributions.\"",
-     "https://github.com/pytorch/captum",
-     "Алгоритмический состав методов интерпретируемости (Explainable AI) не формализован предикатами RDF-графа.")
-]
-
-for title, q_text, ans, quote, src, reason in text_questions:
-    add_header(title, level=3)
-    p = doc.add_paragraph()
-    p.add_run("Формулировка: ").bold = True
-    p.add_run(q_text)
-    p2 = doc.add_paragraph()
-    p2.add_run("Эталонный ответ: ").bold = True
-    p2.add_run(ans)
-    p3 = doc.add_paragraph()
-    p3.add_run("Цитата из источника: ").bold = True
-    p3.add_run(quote)
-    p4 = doc.add_paragraph()
-    p4.add_run("Ссылка на источник: ").bold = True
-    p4.add_run(src)
-    p5 = doc.add_paragraph()
-    p5.add_run("Причина отсутствия ответа в графе: ").bold = True
-    p5.add_run(reason)
-
-add_header("Группа В: 2 комбинированных вопроса (граф + текст)", level=2)
-
-comb_questions = [
-    ("Вопрос 11 (Комбинированный)",
-     "Найти через граф знаний библиотеку компьютерного зрения с наибольшим числом версий, а затем из ее README определить коллекции предобученных архитектур, поддерживаемых библиотекой.",
-     "Графовая часть: SPARQL-запрос обращается к классу pte:ComputerVisionLibrary, сортирует элементы по pte:versionCount и идентифицирует библиотеку timm (PyTorch Image Models, 50 версий).",
-     "Текстовая часть: Из README timm извлекается описание: библиотека предоставляет свыше 1000 моделей, охватывающих семейства ResNet, Vision Transformer (ViT), Swin Transformer, EfficientNet, ConvNeXt и EVA с весами на ImageNet-1k/22k.",
-     "Библиотека timm (лидер по версиям среди CV) предоставляет реализации современных трансформеров ViT/Swin и свёрточных сетей ConvNeXt/ResNet с предварительно обученными весами."),
-
-    ("Вопрос 12 (Комбинированный)",
-     "Найти через граф знаний вероятностную библиотеку, распространяемую по лицензии MIT, а затем по тексту ее документации определить, для какого класса задач графового машинного обучения она оптимизирована.",
-     "Графовая часть: SPARQL-запрос фильтрует библиотеки класса pte:ProbabilisticAndGraphLibrary со связью pte:hasLicense на экземпляр License_MIT, находя библиотеку PyKEEN.",
-     "Текстовая часть: В README PyKEEN указано, что пакет оптимизирован для обучения и сравнительного бенчмаркинга эмбеддингов графов знаний (Knowledge Graph Embeddings, KGE) и содержит реализации моделей TransE, RotatE, ComplEx и ConvE.",
-     "Библиотека PyKEEN (вероятностный и графовый ML, лицензия MIT) оптимизирована для обучения векторных представлений сущностей и связей в графах знаний (Knowledge Graph Embeddings).")
-]
-
-for title, q_text, g_part, t_part, ans in comb_questions:
-    add_header(title, level=3)
-    p = doc.add_paragraph()
-    p.add_run("Формулировка: ").bold = True
-    p.add_run(q_text)
-    p2 = doc.add_paragraph()
-    p2.add_run("1. Часть, извлекаемая из графа: ").bold = True
-    p2.add_run(g_part)
-    p3 = doc.add_paragraph()
-    p3.add_run("2. Часть, извлекаемая из текста: ").bold = True
-    p3.add_run(t_part)
-    p4 = doc.add_paragraph()
-    p4.add_run("Эталонный ответ: ").bold = True
-    p4.add_run(ans)
+    for hyperlink in block.xpath(".//w:hyperlink[@r:id]"):
+        source_link = task2_doc.part.rels[hyperlink.get(qn("r:id"))]
+        link_id = doc.part.relate_to(source_link.target_ref, source_link.reltype, is_external=True)
+        hyperlink.set(qn("r:id"), link_id)
+    doc.element.body.insert_element_before(block, "w:sectPr")
 
 doc.add_paragraph()
 
