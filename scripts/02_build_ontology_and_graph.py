@@ -99,7 +99,7 @@ ont.add((PTE["hasSourceCodeRepository"], RDFS.subPropertyOf, PTE["hasRepository"
 # Datatype Properties
 dt_props = [
     ("libraryName", "SoftwareLibrary", XSD.string, "название библиотеки", "library name", "Строковое имя программной библиотеки.", False),
-    ("versionNumber", "SoftwareVersion", XSD.string, "номер версии", "version number", "Идентификатор версии в формате semver.", True),
+    ("versionIdentifier", "SoftwareVersion", XSD.string, "идентификатор версии", "version identifier", "Строковый идентификатор релиза.", True),
     ("releaseDate", "SoftwareVersion", XSD.dateTime, "дата релиза", "release date", "Точная дата публикации версии (квалификатор времени).", False),
     ("versionType", "SoftwareVersion", XSD.string, "тип версии", "version type", "Статус релиза: stable, alpha, beta.", False),
     ("repositoryURL", "Repository", XSD.anyURI, "URL репозитория", "repository URL", "Веб-адрес репозитория исходного кода.", True),

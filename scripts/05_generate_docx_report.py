@@ -248,7 +248,7 @@ ont_reqs = [
     ("Иерархия классов (10 классов)", "Выстроена строгая таксономия: базовый класс SoftwareLibrary -> MachineLearningLibrary -> подклассы ComputerVisionLibrary, NaturalLanguageProcessingLibrary, AudioProcessingLibrary, ProbabilisticAndGraphLibrary, OptimizationAndTrainingLibrary. Также введены вспомогательные классы SoftwareLicense, SoftwareVersion, Repository."),
     ("Object Properties (6 свойств)", "dependsOnSoftware, hasLicense, hasPrimaryLicense, hasRepository, hasSourceCodeRepository, hasVersion. Для всех явно специфицированы rdfs:domain и rdfs:range."),
     ("Datatype Properties (7 свойств)", "libraryName (xsd:string), versionIdentifier (xsd:string), releaseDate (xsd:dateTime), versionType (xsd:string), repositoryURL (xsd:anyURI), licenseName (xsd:string), versionCount (xsd:integer). Для всех указаны domain и range."),
-    ("Функциональные свойства", "Объявлены functional properties: pte:hasPrimaryLicense, pte:hasSourceCodeRepository, pte:repositoryURL, pte:licenseName, pte:versionCount (у объекта может быть ровно одно значение)."),
+    ("Функциональные свойства", "К функциональным относятся pte:hasPrimaryLicense, pte:hasSourceCodeRepository, pte:repositoryURL, pte:licenseName, pte:versionCount и pte:versionIdentifier. Каждое допускает максимум одно значение для одного субъекта."),
     ("Аннотации и метаданные", "У всех классов и свойств заданы rdfs:label на русском и английском языках (@ru, @en), а также развернутые rdfs:comment."),
     ("Связи с Wikidata", "Указаны owl:equivalentClass к сущностям Wikidata (wd:Q188860, wd:Q21169670, wd:Q207621, wd:Q341) и owl:equivalentProperty (wdt:P1547, wdt:P275, wdt:P1324).")
 ]
@@ -277,11 +277,10 @@ mat_data = [
     ("pte:dependsOnSoftware", "Object", "В4", "Проверка зависимости библиотеки от PyTorch."),
     ("pte:hasRepository\npte:repositoryURL", "Object / Datatype", "В4, В6", "Путь из двух рёбер от библиотеки к URL репозитория."),
     ("pte:hasVersion\npte:releaseDate", "Object / Datatype", "В5", "Переход к релизу, фильтр за 2023 год и сортировка по дате публикации."),
-    ("pte:versionIdentifier", "Предикат графа", "В5", "Номер версии в результате. В ontology.ttl для номера версии объявлено pte:versionNumber."),
+    ("pte:versionIdentifier", "Datatype", "В5", "Строковый идентификатор релиза. В5 возвращает его и использует для сортировки при равных дате и названии."),
     ("owl:sameAs", "Свойство OWL", "В11, В12", "QID выбранной графом библиотеки связывает результат с записью корпуса и README."),
     ("pte:hasPrimaryLicense", "Object", "—", "Функциональное подсвойство для единственной основной лицензии проекта."),
     ("pte:hasSourceCodeRepository", "Object", "—", "Функциональное подсвойство для единственного основного репозитория проекта."),
-    ("pte:versionNumber", "Datatype", "—", "Объявленный в онтологии идентификатор релиза в формате semver. В5 читает pte:versionIdentifier из графа."),
     ("pte:versionType", "Datatype", "—", "Статус релиза, например stable. Свойство позволяет отбирать версии по статусу независимо от даты."),
     ("README / data/corpus.jsonl", "Текстовый источник", "В7–В12", "В7–В10 используют текст по заранее заданному QID. В11–В12 читают текст после выбора библиотеки графом."),
 ]
