@@ -259,21 +259,46 @@ for k, v in ont_reqs:
     p.add_run(v)
 
 add_header("Матрица использования классов и свойств в вопросах", level=2)
-mat_tbl = doc.add_table(rows=8, cols=4)
-mat_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
 mat_data = [
-    ("Элемент онтологии", "Тип элемента", "Используется в вопросах", "Обоснование необходимости"),
-    ("pte:SoftwareLibrary / MachineLearningLibrary", "Класс", "В1, В2, В3, В5", "Базовый класс всех анализируемых пакетов ML"),
-    ("pte:ComputerVisionLibrary", "Класс", "В4, В11", "Выделение домена компьютерного зрения"),
-    ("pte:NaturalLanguageProcessingLibrary", "Класс", "В6", "Выделение домена обработки текста (NLP)"),
-    ("pte:ProbabilisticAndGraphLibrary", "Класс", "В12", "Выделение вероятностных и графовых моделей"),
-    ("pte:hasLicense / pte:licenseName", "Object / Datatype", "В2, В4, В12", "Учет лицензионной чистоты и совместимости"),
-    ("pte:hasVersion / pte:releaseDate", "Object / Datatype", "В5", "Анализ квалификатора даты выпуска релиза"),
-    ("pte:hasRepository / pte:repositoryURL", "Object / Datatype", "В4, В6, В11, В12", "Связывание с исходным кодом и текстами README")
+    ("Класс, свойство или источник", "Тип элемента", "Вопросы", "Роль в ответе или модели"),
+    ("pte:SoftwareLibrary", "Класс", "В1–В6, В11–В12\n(косвенно)", "Область определения свойств библиотек в графовых запросах."),
+    ("pte:MachineLearningLibrary", "Класс", "—", "Общий суперкласс для специализированных библиотек машинного обучения."),
+    ("pte:ComputerVisionLibrary", "Класс", "В4, В11", "Явный фильтр по классу библиотек компьютерного зрения."),
+    ("pte:NaturalLanguageProcessingLibrary", "Класс", "В6", "Явный фильтр по классу библиотек обработки естественного языка."),
+    ("pte:ProbabilisticAndGraphLibrary", "Класс", "В12", "Явный фильтр по классу вероятностных и графовых библиотек."),
+    ("pte:AudioProcessingLibrary\npte:OptimizationAndTrainingLibrary", "Классы", "—", "Классификация аудиобиблиотек и средств оптимизации и обучения."),
+    ("pte:SoftwareLicense", "Класс", "В2, В4, В11, В12\n(косвенно)", "Класс объектов связи pte:hasLicense."),
+    ("pte:SoftwareVersion", "Класс", "В5\n(косвенно)", "Класс узлов релизов, к которым ведёт pte:hasVersion."),
+    ("pte:Repository", "Класс", "В4, В6\n(косвенно)", "Класс промежуточных узлов на пути от библиотеки к URL."),
+    ("pte:libraryName", "Datatype", "В1, В3–В6, В11, В12", "Имя библиотеки в результате запроса."),
+    ("pte:versionCount", "Datatype", "В1, В3, В11, В12", "Фильтр по числу версий в В1 и В12. Сортировка в В3 и В11."),
+    ("pte:hasLicense", "Object", "В2, В4, В11, В12", "Связь для подсчёта по лицензиям в В2 и отбора по конкретной лицензии в В4, В11 и В12."),
+    ("pte:licenseName", "Datatype", "В2", "Группировка по названию лицензии."),
+    ("pte:dependsOnSoftware", "Object", "В4", "Проверка зависимости библиотеки от PyTorch."),
+    ("pte:hasRepository\npte:repositoryURL", "Object / Datatype", "В4, В6", "Путь из двух рёбер от библиотеки к URL репозитория."),
+    ("pte:hasVersion\npte:releaseDate", "Object / Datatype", "В5", "Переход к релизу, фильтр за 2023 год и сортировка по дате публикации."),
+    ("pte:versionIdentifier", "Предикат графа", "В5", "Номер версии в результате. В ontology.ttl для номера версии объявлено pte:versionNumber."),
+    ("owl:sameAs", "Свойство OWL", "В11, В12", "QID выбранной графом библиотеки связывает результат с записью корпуса и README."),
+    ("pte:hasPrimaryLicense", "Object", "—", "Функциональное подсвойство для единственной основной лицензии проекта."),
+    ("pte:hasSourceCodeRepository", "Object", "—", "Функциональное подсвойство для единственного основного репозитория проекта."),
+    ("pte:versionNumber", "Datatype", "—", "Объявленный в онтологии идентификатор релиза в формате semver. В5 читает pte:versionIdentifier из графа."),
+    ("pte:versionType", "Datatype", "—", "Статус релиза, например stable. Свойство позволяет отбирать версии по статусу независимо от даты."),
+    ("README / data/corpus.jsonl", "Текстовый источник", "В7–В12", "В7–В10 используют текст по заранее заданному QID. В11–В12 читают текст после выбора библиотеки графом."),
 ]
-for r_i, row in enumerate(mat_data):
-    for c_i, val in enumerate(row):
-        c = mat_tbl.cell(r_i, c_i)
+mat_tbl = doc.add_table(rows=len(mat_data), cols=4)
+mat_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+mat_tbl.autofit = False
+mat_widths = (Inches(2.55), Inches(1.05), Inches(1.10), Inches(2.20))
+for column, width in zip(mat_tbl.columns, mat_widths):
+    column.width = width
+for r_i, values in enumerate(mat_data):
+    row = mat_tbl.rows[r_i]
+    row_props = row._tr.get_or_add_trPr()
+    row_props.append(OxmlElement('w:cantSplit'))
+    if r_i == 0:
+        row_props.append(OxmlElement('w:tblHeader'))
+    for c_i, (c, val, width) in enumerate(zip(row.cells, values, mat_widths)):
+        c.width = width
         set_cell_margins(c, top=60, bottom=60, left=80, right=80)
         p = c.paragraphs[0]
         p.paragraph_format.space_after = Pt(0)
