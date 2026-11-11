@@ -5,6 +5,7 @@ import docx
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.opc.constants import RELATIONSHIP_TYPE
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
@@ -390,10 +391,12 @@ doc.add_paragraph(
     "В результате работы машины логического вывода граф замкнут относительно аксиом RDFS и правил OWL 2 RL:"
 )
 
+owl_summary = Path("data/owlrl_reasoning_summary.txt").read_text(encoding="utf-8").splitlines()
+initial, total, added = (int(line.split(": ", 1)[1]) for line in owl_summary[:3])
 owl_stats = [
-    ("Исходное число триплетов (онтология + данные)", "9 378"),
-    ("Число триплетов после логического вывода", "22 201"),
-    ("Добавлено выведенных триплетов (Inferred Triples)", "+12 823")
+    ("Исходное число триплетов (онтология + данные)", f"{initial:,}".replace(",", " ")),
+    ("Число триплетов после логического вывода", f"{total:,}".replace(",", " ")),
+    ("Добавлено выведенных триплетов (Inferred Triples)", f"+{added:,}".replace(",", " ")),
 ]
 tbl_owl = doc.add_table(rows=4, cols=2)
 tbl_owl.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -419,44 +422,63 @@ doc.add_paragraph(
     "Примеры добавленных фактов в ходе дедуктивного вывода:\n"
     "1. Транзитивность подклассов: для индивида pte:Lib_kornia_Q107382312, явно объявленного экземпляром ComputerVisionLibrary, "
     "выведены типы MachineLearningLibrary и SoftwareLibrary.\n"
-    "2. Наследование подсвойств: свойство pte:hasSourceCodeRepository вывело тройки по суперсвойству pte:hasRepository.\n"
-    "3. Семантика эквивалентности: через owl:sameAs факты типизации и свойства сдублированы на глобальные сущности Wikidata."
+    "2. Эквивалентность свойств даёт тройку pte:PyTorch wdt:P1324 pte:Repo_PyTorch_Q47509047 из pte:hasRepository.\n"
+    "3. По owl:sameAs выведена тройка wd:Q47509047 pte:hasRepository pte:Repo_PyTorch_Q47509047."
 )
 
 add_header("2. Валидация ограничений целостности SHACL (pyshacl)", level=2)
 doc.add_paragraph(
-    "Разработан шейп-файл shapes.shacl.ttl, проверяющий 4 различных вида ограничений:\n"
-    "• Кардинальность (Cardinality): sh:minCount 1, sh:maxCount 1 на название библиотеки и репозиторий.\n"
-    "• Класс значения (Value Class): sh:class pte:SoftwareLicense на отношение pte:hasLicense.\n"
-    "• Тип данных (Datatype): sh:datatype xsd:dateTime для pte:releaseDate и xsd:string для версий.\n"
-    "• Регулярное выражение (Pattern): sh:pattern \"^https://github\\\\.com/.*\" на URL репозиториев."
+    "Проверены кардинальность, класс объекта лицензии, типы данных, шаблон URL GitHub и нижняя граница счётчика версий. "
+    "До исправления PySHACL вернул пять нарушений sh:minCount. Четыре касались pte:hasLicense у GFPGAN, OpenCLIP, "
+    "pytorch-wavelets и PyTorch. Пятое касалось pte:hasSourceCodeRepository у PyTorch. "
+    "Сборщик воспроизводит следующие дополнения по официальным репозиториям."
 )
 
-doc.add_paragraph("Протокол валидации PySHACL до исправления:")
-shacl_log = """Validation Report
-Conforms: False
-Results (5):
-Constraint Violation in MinCountConstraintComponent (sh:minCount 1):
-  Target Class: pte:SoftwareLibrary
-  Focus Node: pte:Lib_gfpgan_Q120549808
-  Result Path: pte:hasLicense
-  Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense.
+corrections = [
+    ("GFPGAN", "Apache License 2.0 для кода проекта с оговорками о сторонних компонентах.", (
+        ("LICENSE", "https://github.com/TencentARC/GFPGAN/blob/7552a7791caad982045a7bbe5634bbf1cd5c8679/LICENSE"),
+    )),
+    ("OpenCLIP", "Лицензия MIT.", (
+        ("LICENSE", "https://github.com/mlfoundations/open_clip/blob/4cc208d3a44a2fb6d6435006a46f520d2ccc29b1/LICENSE"),
+    )),
+    ("pytorch-wavelets", "Классификатор пакета Free To Use But Restricted. MIT применяется к новому коду и DWT, для DTCWT действуют отдельные условия.", (
+        ("setup.py", "https://github.com/fbcotter/pytorch_wavelets/blob/9a0c507f04f43c5397e384bb6be8340169b2fd9a/setup.py#L21-L28"),
+        ("LICENSE", "https://github.com/fbcotter/pytorch_wavelets/blob/9a0c507f04f43c5397e384bb6be8340169b2fd9a/LICENSE#L1-L7"),
+    )),
+    ("PyTorch", "Модифицированная лицензия BSD (BSD-3-Clause) и основной репозиторий pytorch/pytorch.", (
+        ("LICENSE", "https://github.com/pytorch/pytorch/blob/d38164a545b4a4e4e0cf73ce67173f70574890b6/LICENSE"),
+        ("репозиторий", "https://github.com/pytorch/pytorch"),
+    )),
+]
+for project, change, sources in corrections:
+    p = doc.add_paragraph()
+    p.add_run(f"{project} — ").bold = True
+    p.add_run(change)
+    for label, url in sources:
+        p.add_run(" ")
+        link = OxmlElement("w:hyperlink")
+        link.set(qn("r:id"), doc.part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True))
+        run = OxmlElement("w:r")
+        properties = OxmlElement("w:rPr")
+        underline = OxmlElement("w:u")
+        underline.set(qn("w:val"), "single")
+        properties.append(underline)
+        run.append(properties)
+        label_text = OxmlElement("w:t")
+        label_text.text = label
+        run.append(label_text)
+        link.append(run)
+        p._p.append(link)
 
-Constraint Violation in MinCountConstraintComponent (sh:minCount 1):
-  Target Class: pte:SoftwareLibrary
-  Focus Node: pte:Lib_open_clip_torch_Q120550360
-  Result Path: pte:hasLicense
-  Message: Лицензия библиотеки должна быть объектом класса SoftwareLicense."""
+doc.add_paragraph("Протокол повторной проверки PySHACL")
+shacl_log = Path("data/shacl_validation_report.txt").read_text(encoding="utf-8").split("\n\n", 1)[1]
 add_code_block(shacl_log)
 
 doc.add_paragraph(
-    "Анализ выявленных нарушений и принятые решения:\n"
-    "• Тип нарушения: Отсутствие лицензии (sh:minCount 1) у 5 библиотек (gfpgan, open-clip-torch, pytorch-wavelets и др.), "
-    "так как в исходной Wikidata свойство P275 не было проставлено сообществом.\n"
-    "• Принятое решение: Ограничение сохранено как обязательный инвариант предметной области (в открытом ПО лицензия обязательна). "
-    "Данные в knowledge_graph.ttl были исправлены и дополнены путем парсинга информации о лицензиях из GitHub-репозиториев "
-    "(проставлены лицензии Apache 2.0 и MIT).\n"
-    "• Повторная валидация после дополнения данных: Conforms: True (нарушения полностью устранены)."
+    "После исправления В2 учитывает 53 узла, включая центральный PyTorch. Распределение по лицензиям: MIT — 23, "
+    "Apache 2.0 — 21, модифицированная BSD — 6, двухпунктная BSD — 2, Free To Use But Restricted — 1. "
+    "В4 теперь также возвращает GFPGAN и его репозиторий. Результаты В1, В3, В5, В6, В11 и В12 совпали с эталонами. "
+    "В разделе 2 приведены результаты для снимка графа до этого исправления."
 )
 
 # Table of 52 Libraries in Appendix
